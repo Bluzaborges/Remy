@@ -1,0 +1,86 @@
+﻿@section Scripts {
+	<script src="~/js/RegisterAppointment.js"></script>
+}
+
+<div class="subheader py-2 py-lg-4 subheader-solid" id="kt_subheader">
+	<div class="container-fluid d-flex align-items-center justify-content-between flex-wrap flex-sm-nowrap">
+		<div class="d-flex align-items-center flex-wrap mr-2">
+			<h5 class="text-dark font-weight-bold mt-2 mb-2 mr-5">Compromissos</h5>
+			<div class="subheader-separator subheader-separator-ver mt-2 mb-2 mr-4 bg-gray-200"></div>
+			<ul class="breadcrumb breadcrumb-transparent breadcrumb-dot font-weight-bold p-0 my-2 font-size-sm">
+				<li class="breadcrumb-item">
+					<a href="/Appointment" class="text-muted">Adicionar Compromisso</a>
+				</li>
+			</ul>
+		</div>
+	</div>
+</div>
+
+<form>
+	<div class="card-body">
+		<div class="form-group row">
+			<label class="col-form-label col-md-2 col-sm-12 text-sm-left text-md-right">Nome<span class="text-danger">*</span></label>
+			<div class="col-md-8 col-sm-12">
+				<input id="appointment-name" type="text" class="form-control" placeholder="Digite o nome do compromisso" />
+			</div>
+		</div>
+		<div class="form-group row">
+			<label class="col-form-label col-md-2 col-sm-12 text-sm-left text-md-right">Data<span class="text-danger">*</span></label>
+			<div class="col-md-8 col-sm-12">
+				<input id="appointment-date" type="date" class="form-control" />
+			</div>
+		</div>
+		<div class="form-group row">
+			<label class="col-form-label col-md-2 col-sm-12 text-sm-left text-md-right">Horário<span class="text-danger">*</span></label>
+			<div class="col-md-8 col-sm-12">
+				<input id="appointment-time" type="time" class="form-control" />
+			</div>
+		</div>
+		<div class="form-group row">
+			<label class="col-form-label col-md-2 col-sm-12 text-sm-left text-md-right">Quando enviar</label>
+			<div class="col-md-8 col-sm-12">
+				<select class="form-control select2" id="select-type" name="param">
+					<option value="hour">1 hora antes</option>
+					<option value="day">1 dia antes</option>
+					<option value="week">1 semana antes</option>
+					<option value="month">1 mês antes</option>
+				</select>
+			</div>
+		</div>
+		<div class="form-group row">
+			<label class="col-form-label col-md-2 col-sm-12 text-sm-left text-md-right">Descrição</label>
+			<div class="col-md-8 col-sm-12">
+				<textarea class="form-control form-control-solid" id="appointment-description" placeholder="Descrição do compromisso" rows="3"></textarea>
+			</div>
+		</div>
+		<div class="form-group row">
+			<label class="col-form-label col-md-2 col-sm-12 text-sm-left text-md-right">Tipo de notificação<span class="text-danger">*</span></label>
+			<div class="col-md-8 col-sm-12">
+				<div class="checkbox-list">
+					<label class="checkbox">
+						<input type="checkbox" id="type-whatsapp"/>
+						<span></span>
+						WhatsApp
+					</label>
+					<label class="checkbox">
+						<input type="checkbox" id="type-sms"/>
+						<span></span>
+						SMS
+					</label>
+					<label class="checkbox">
+						<input type="checkbox" id="type-email" />
+						<span></span>
+						Email
+					</label>
+				</div>
+			</div>
+		</div>
+	</div>
+</form>
+
+<div class="card-footer">
+	<div class="col-md-12 text-lg-right">
+		<button type="button" class="btn btn-secondary" id="btnBack" onclick="location.href='/Appointment/Index'">Voltar</button>
+		<button type="button" class="btn btn-success mr-2" id="btnSubmit">Salvar</button>
+	</div>
+</div>
