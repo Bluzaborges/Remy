@@ -11,7 +11,7 @@ namespace Remy.Database
 
 			try
 			{
-				string connectionString = String.Format(@"Server={0};Database={1};User Id={2};Password={3};Trusted_Connection=true",
+				string connectionString = String.Format(@"Server={0};Database={1};User Id={2};Password={3};",
 														Config.dbHost, Config.dbName, Config.dbUser, Config.dbPass);
 
 				result = new SqlConnection(connectionString);

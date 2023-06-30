@@ -1,4 +1,6 @@
-﻿var KTCalendarBasic = function () {
+﻿var calendar;
+
+var KTCalendarBasic = function () {
 
     return {
 
@@ -9,11 +11,11 @@
             for (let i = 0; i < data.length; i++) {
                 let appointment = {};
                 appointment.id = data[i].id;
+                appointment.url = "/Appointment/Edit?id=" + data[i].id;
                 appointment.title = data[i].name;
                 appointment.start = data[i].date.substring(0, 10) + 'T' + data[i].time;
                 appointment.description = data[i].description;
                 appointment.className = "fc-event-success";
-                appointment.url = `/Appointment/Edit/${data[i].id}`;
                 appointmentsList.push(appointment);
             }
 
@@ -24,7 +26,7 @@
             var TOMORROW = todayDate.clone().add(1, 'day').format('YYYY-MM-DD');
 
             var calendarEl = document.getElementById('kt_calendar');
-            var calendar = new FullCalendar.Calendar(calendarEl, {
+            calendar = new FullCalendar.Calendar(calendarEl, {
                 plugins: ['bootstrap', 'interaction', 'dayGrid', 'timeGrid', 'list'],
                 themeSystem: 'bootstrap',
                 locale: 'pt-br',
@@ -37,9 +39,9 @@
                     right: 'dayGridMonth,timeGridWeek,timeGridDay'
                 },
 
-                height: 800,
-                contentHeight: 780,
-                aspectRatio: 3,
+                height: 550,
+                contentHeight: 550,
+                aspectRatio: 1,
 
                 nowIndicator: true,
                 now: TODAY,
@@ -153,7 +155,7 @@ function LoadAppointmentsTable() {
                 selector: false,
                 overflow: 'visible',
                 autoHide: false,
-                width: 300,
+                width: 250,
                 template: function (row) {
                     return '<a href="/FinalClient/EditFinalClient?id=' + row.id + '" class="text-truncate text-dark-75 d-block font-size-md">' + row.name + '</a>';
                 }
@@ -269,16 +271,16 @@ function LoadAppointmentsTable() {
                 textAlign: 'right',
                 overflow: 'visible',
                 autoHide: false,
-                width: 150,
+                width: 80,
                 template: function (row) {
 
                     var output = '\
-	                     <a href="/FinalClient/EditFinalClient?id=' + row.id + '" class="btn btn-sm btn-icon btn-bg-light btn-icon-primary btn-hover-primary mx-1" title="Editar">\
+	                     <a href="/Appointment/Edit?id=' + row.id + '" class="btn btn-sm btn-icon btn-bg-light btn-icon-primary btn-hover-primary mx-1" title="Editar">\
 		                    <i class="fas fa-edit"></i>\
 	                    </a>';
 
                     output += '\
-                        <a class="btn btn-sm btn-icon btn-bg-light btn-icon-danger btn-hover-danger btn-delete" idFinalClient = "' + row.id + '" title = "Excluir" >\
+                        <a class="btn btn-sm btn-icon btn-bg-light btn-icon-danger btn-hover-danger btn-delete" idAppointment = "' + row.id + '" title = "Excluir" >\
 		                    <i class="flaticon-delete-1"></i>\
 	                    </a>';
 
@@ -307,6 +309,8 @@ $(".change-view").on("click", function () {
         divTable.setAttribute("hidden", "");
         changeViewAncorToList.removeAttribute("hidden");
         changeViewAncorToCalendar.setAttribute("hidden", "");
+        calendar.destroy();
+        LoadAppointmentsCalendar();
     } else {
         headingTitle.innerHTML = "Lista";
         divCalendar.setAttribute("hidden", "");
@@ -315,4 +319,44 @@ $(".change-view").on("click", function () {
         changeViewAncorToList.setAttribute("hidden", "");
         LoadAppointmentsTable();
     }
+});
+
+$("#appointment-table").on("click", ".btn-delete", function (e) {
+
+    var selectedItem = $(this);
+
+    Swal.fire({
+        title: "Deseja realmente excluir?",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "Sim, excluir!",
+        cancelButtonText: "Não, cancelar!",
+        reverseButtons: true
+    }).then(function (result) {
+        if (result.value) {
+
+            $.ajax({
+                url: "/Appointment/DeleteAppointment",
+                type: "POST",
+                data: JSON.stringify($(selectedItem).attr("idAppointment")),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+
+                success: function (data) {
+                    if (data) {
+                        toastr.success("Excluido!", 'Sucesso!');
+                        datatable.reload();
+                    }
+                },
+                error: function (xhr, ajaxOptions, thrownError) {
+                    console.error(xhr);
+                    console.error(ajaxOptions);
+                    console.error(thrownError);
+                    toastr.error(thrownError, 'Atenção!');
+                }
+            });
+
+        }
+    });
+
 });

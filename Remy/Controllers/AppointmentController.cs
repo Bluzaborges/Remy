@@ -1,5 +1,4 @@
-﻿using System.Net;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Remy.Database;
 using Remy.Global;
 using Remy.Models;
@@ -15,15 +14,22 @@ namespace Remy.Controllers
 
         public IActionResult Register()
         {
-            return View();
+			Appointment appointment = new Appointment();
+			appointment.Id = 0;
+
+            return View("Register", appointment);
         }
 
-		public IActionResult Edit()
+		public IActionResult Edit(int id)
 		{
-			return View();
+			DbAppointment dbAppointment = new DbAppointment();
+
+			Appointment appointment = dbAppointment.GetAppointmentById(id);
+
+			return View("Register", appointment);
 		}
 
-		[HttpPost]
+        [HttpPost]
         public JsonResult RegisterAppointment([FromBody] Appointment appointment)
         {
             DbAppointment dbAppointment = new DbAppointment();
@@ -43,7 +49,7 @@ namespace Remy.Controllers
                 if (appointment.Date == DateTime.MinValue)
 					return Json(new { success = result, message = "Data não preenchida." });
 
-				if (appointment.Date < DateTime.Now)
+				if (appointment.Date < DateTime.Now.Date)
 					return Json(new { success = result, message = "Não é possível cadastrar compromissos com data inferior à atual." });
 
 				if (appointment.Time == TimeSpan.Zero)
@@ -52,7 +58,10 @@ namespace Remy.Controllers
 				if (!appointment.Whatsapp && !appointment.Sms && !appointment.Email)
 					return Json(new { success = result, message = "Nenhum tipo de notificação selecionado." });
 
-                result = dbAppointment.RegisterAppointment(appointment);
+				if (appointment.Id == 0)
+					result = dbAppointment.RegisterAppointment(appointment);
+				else
+					result = dbAppointment.UpdateAppointment(appointment);
 
                 if (!result)
 					return Json(new { success = result, message = "Não foi possível inserir o compromisso." });
@@ -83,84 +92,25 @@ namespace Remy.Controllers
 			return Json(appointments);
 		}
 
-		[HttpGet("Appointment/GetAppointmentById/{id}")]
-		public JsonResult GetAppointmentById([FromRoute] string id)
+		[HttpPost]
+		public JsonResult DeleteAppointment([FromBody] int id)
 		{
-			var dbAppointment = new DbAppointment();
-			Appointment appointment = null;
+			DbAppointment dbAppointment = new DbAppointment();
+			var result = false;
 
 			try
 			{
-				appointment = dbAppointment.GetAppointmentById(id);
+				if (id == 0)
+					return Json(result);
+
+				result = dbAppointment.DeleteAppointment(id);
 			}
 			catch (Exception ex)
 			{
-				Log.Add(LogType.error, "[AppointmentController.GetAllAppointments]: " + ex.Message);
+				Log.Add(LogType.error, "[AppointmentController.DeleteAppointment]: " + ex.Message);
 			}
 
-			return appointment == null ? Json("Not Found") : Json(appointment);
+			return Json(result);
 		}
-
-
-        [HttpPost]
-        public JsonResult UpdateAppointment([FromBody] Appointment appointment)
-        {
-            DbAppointment dbAppointment = new DbAppointment();
-            bool result = false;
-
-            try
-            {
-                if (string.IsNullOrEmpty(appointment.Name))
-                    return Json(new { success = result, message = "Nome do compromisso não preenchido." });
-
-                if (appointment.Name.Length > 150)
-                    return Json(new { success = result, message = "Nome maior que o número de caracteres permitido." });
-
-                if (appointment.Name.Length > 3000)
-                    return Json(new { success = result, message = "Descrição maior que o número de caracteres permitido." });
-
-                if (appointment.Date == DateTime.MinValue)
-                    return Json(new { success = result, message = "Data não preenchida." });
-
-                if (appointment.Date < DateTime.Now)
-                    return Json(new { success = result, message = "Não é possível cadastrar compromissos com data inferior à atual." });
-
-                if (appointment.Time == TimeSpan.Zero)
-                    return Json(new { success = result, message = "Hora não preenchida." });
-
-                if (!appointment.Whatsapp && !appointment.Sms && !appointment.Email)
-                    return Json(new { success = result, message = "Nenhum tipo de notificação selecionado." });
-
-                result = dbAppointment.UpdateAppointment(appointment);
-
-                if (!result)
-                    return Json(new { success = result, message = "Não foi possível inserir o compromisso." });
-
-            }
-            catch (Exception ex)
-            {
-                Log.Add(LogType.error, "[AppointmentController.RegisterAppointment]: " + ex.Message);
-            }
-
-            return new JsonResult(new { success = result, message = appointment.Name });
-        }
-
-        [HttpDelete("/Appointment/DeleteAppointment/{id}")]
-        public JsonResult DeleteAppointment(string id)
-        {
-            var dbAppointment = new DbAppointment();
-            var result = false;
-
-            try
-            {
-                dbAppointment.DeleteAppointment(id);
-            }
-            catch (Exception ex)
-            {
-                Log.Add(LogType.error, "[AppointmentController.DeleteAppointment]: " + ex.Message);
-            }
-
-            return new JsonResult(new { success = result, message = "Delete com sucesso" });
-        }
-    }
+	}
 }

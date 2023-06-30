@@ -8,9 +8,14 @@
 			<h5 class="text-dark font-weight-bold mt-2 mb-2 mr-5">Compromissos</h5>
 			<div class="subheader-separator subheader-separator-ver mt-2 mb-2 mr-4 bg-gray-200"></div>
 			<ul class="breadcrumb breadcrumb-transparent breadcrumb-dot font-weight-bold p-0 my-2 font-size-sm">
-				<li class="breadcrumb-item">
-					<a href="/Appointment" class="text-muted">Adicionar Compromisso</a>
-				</li>
+				@if (Model.Id == 0)
+				{
+					<a class="text-muted">Adicionar Compromisso</a>
+				}
+				else
+				{
+					<a class="text-muted">Editar Compromisso</a>
+				}
 			</ul>
 		</div>
 	</div>
@@ -19,38 +24,39 @@
 <form>
 	<div class="card-body">
 		<div class="form-group row">
+			<input id="appointment-id" value=@Model.Id hidden />
 			<label class="col-form-label col-md-2 col-sm-12 text-sm-left text-md-right">Nome<span class="text-danger">*</span></label>
 			<div class="col-md-8 col-sm-12">
-				<input id="appointment-name" type="text" class="form-control" placeholder="Digite o nome do compromisso" />
+				<input id="appointment-name" type="text" class="form-control" placeholder="Digite o nome do compromisso" value="@Model.Name" />
 			</div>
 		</div>
 		<div class="form-group row">
 			<label class="col-form-label col-md-2 col-sm-12 text-sm-left text-md-right">Data<span class="text-danger">*</span></label>
 			<div class="col-md-8 col-sm-12">
-				<input id="appointment-date" type="date" class="form-control" />
+				<input id="appointment-date" type="date" class="form-control" value="@(Model.Id != 0 ? Model.Date.ToString("yyyy-MM-dd") : null)"/>
 			</div>
 		</div>
 		<div class="form-group row">
 			<label class="col-form-label col-md-2 col-sm-12 text-sm-left text-md-right">Horário<span class="text-danger">*</span></label>
 			<div class="col-md-8 col-sm-12">
-				<input id="appointment-time" type="time" class="form-control" />
+				<input id="appointment-time" type="time" class="form-control" value="@(Model.Id != 0 ? Model.Time.ToString(@"hh\:mm") : null)" />
 			</div>
 		</div>
 		<div class="form-group row">
 			<label class="col-form-label col-md-2 col-sm-12 text-sm-left text-md-right">Quando enviar</label>
 			<div class="col-md-8 col-sm-12">
 				<select class="form-control select2" id="select-type" name="param">
-					<option value="hour">1 hora antes</option>
-					<option value="day">1 dia antes</option>
-					<option value="week">1 semana antes</option>
-					<option value="month">1 mês antes</option>
+					<option value="hour" selected="@(Model.notificationType == "hour" && Model.Id != 0 ? "selected" : null)">1 hora antes</option>
+					<option value="day" selected="@(Model.notificationType == "day" && Model.Id != 0 ? "selected" : null)">1 dia antes</option>
+					<option value="week" selected="@(Model.notificationType == "week" && Model.Id != 0 ? "selected" : null)">1 semana antes</option>
+					<option value="month" selected="@(Model.notificationType == "month" && Model.Id != 0 ? "selected" : null)">1 mês antes</option>
 				</select>
 			</div>
 		</div>
 		<div class="form-group row">
 			<label class="col-form-label col-md-2 col-sm-12 text-sm-left text-md-right">Descrição</label>
 			<div class="col-md-8 col-sm-12">
-				<textarea class="form-control form-control-solid" id="appointment-description" placeholder="Descrição do compromisso" rows="3"></textarea>
+				<textarea class="form-control form-control-solid" id="appointment-description" placeholder="Descrição do compromisso" rows="3">@(Model.Id != 0 ? Model.Description : null)</textarea>
 			</div>
 		</div>
 		<div class="form-group row">
@@ -58,17 +64,17 @@
 			<div class="col-md-8 col-sm-12">
 				<div class="checkbox-list">
 					<label class="checkbox">
-						<input type="checkbox" id="type-whatsapp"/>
+						<input type="checkbox" id="type-whatsapp" @(Model.Id != 0 && Model.Whatsapp ? "checked" : null) />
 						<span></span>
 						WhatsApp
 					</label>
 					<label class="checkbox">
-						<input type="checkbox" id="type-sms"/>
+						<input type="checkbox" id="type-sms" @(Model.Id != 0 && Model.Sms ? "checked" : null) />
 						<span></span>
 						SMS
 					</label>
 					<label class="checkbox">
-						<input type="checkbox" id="type-email" />
+						<input type="checkbox" id="type-email" @(Model.Id != 0 && Model.Email ? "checked" : null) />
 						<span></span>
 						Email
 					</label>
@@ -81,6 +87,10 @@
 <div class="card-footer">
 	<div class="col-md-12 text-lg-right">
 		<button type="button" class="btn btn-secondary" id="btnBack" onclick="location.href='/Appointment/Index'">Voltar</button>
+		@if (Model.Id != 0)
+		{
+			<button type="button" class="btn btn-danger" id="btnDelete" idAppointment="@Model.Id">Excluir</button>
+		}
 		<button type="button" class="btn btn-success mr-2" id="btnSubmit">Salvar</button>
 	</div>
 </div>
