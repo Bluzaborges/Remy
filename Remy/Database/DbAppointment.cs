@@ -70,7 +70,47 @@ namespace Remy.Database
 			return result;
 		}
 
-		public bool RegisterAppointment(Appointment appointment)
+        public bool UpdateAppointment(Appointment appointment)
+        {
+            bool result = false;
+
+            try
+            {
+                DbAccess db = new DbAccess();
+
+                using (SqlCommand cmd = new SqlCommand())
+                using (cmd.Connection = db.OpenConnection())
+                {
+                    cmd.CommandText = @"USE [" + Config.dbName + "] " +
+                                      @"UPDATE [dbo].[appointments] (" +
+                                      @"[id], [name],[date],[time],[notification_type],[description],[whatsapp],[email],[sms]) " +
+                                      @"VALUES (@Name,@Date,@Time,@Type,@Description,@WhatsApp,@Email,@Sms)
+                                        WHERE [id] = @Id;";
+
+                    cmd.Parameters.AddWithValue("@Name", appointment.Name);
+                    cmd.Parameters.AddWithValue("@Date", appointment.Date);
+                    cmd.Parameters.AddWithValue("@Time", appointment.Time);
+                    cmd.Parameters.AddWithValue("@Type", appointment.notificationType);
+                    cmd.Parameters.AddWithValue("@Description", appointment.Description);
+                    cmd.Parameters.AddWithValue("@WhatsApp", appointment.Whatsapp);
+                    cmd.Parameters.AddWithValue("@Email", appointment.Email);
+                    cmd.Parameters.AddWithValue("@Sms", appointment.Sms);
+                    cmd.Parameters.AddWithValue("@Id", appointment.Id);
+
+                    cmd.ExecuteNonQuery();
+                }
+
+                result = true;
+            }
+            catch (Exception ex)
+            {
+                Log.Add(LogType.error, "[DbAppointment.RegisterAppointment]: " + ex.Message);
+            }
+
+            return result;
+        }
+
+        public bool RegisterAppointment(Appointment appointment)
 		{
 			bool result = false;
 
@@ -108,5 +148,75 @@ namespace Remy.Database
 
 			return result;
 		}
+
+		public Appointment GetAppointmentById(string id)
+		{
+			try
+			{
+				var db = new DbAccess();
+
+				using SqlCommand cmd = new SqlCommand();
+				using (cmd.Connection = db.OpenConnection())
+				{
+					cmd.CommandText = @"USE [" + Config.dbName + "] " +
+					                  @"SELECT [id],[name],[date],[time],[notification_type],[description],[whatsapp],[sms],[email],[sent] FROM [dbo].[appointments] " +
+					                  @"WHERE [deleted] = 0 AND [id] = @AppointmentId;";
+
+					cmd.Parameters.AddWithValue("@AppointmentId", id);
+
+
+
+					using var reader = cmd.ExecuteReader();
+					if (!reader.Read()) 
+						return null;
+
+					var appointment = new Appointment
+					{
+						Id = reader.GetInt32(0),
+						Name = reader.GetString(1),
+						Date = reader.GetDateTime(2),
+						Time = reader.GetTimeSpan(3),
+						notificationType = reader.GetString(4),
+						Description = reader.GetString(5),
+						Whatsapp = reader.GetBoolean(6),
+						Email = reader.GetBoolean(7),
+						Sms = reader.GetBoolean(8),
+					};
+
+					return appointment;
+				}
+				
+			}
+			catch (Exception ex)
+			{
+				Log.Add(LogType.error, "[DbAppointment.RegisterAppointment]: " + ex.Message);
+				return null;
+			}
+		}
+
+		public void DeleteAppointment(string id)
+		{
+            try
+            {
+                var db = new DbAccess();
+
+                using SqlCommand cmd = new SqlCommand();
+                using (cmd.Connection = db.OpenConnection())
+                {
+                    cmd.CommandText = @"USE [" + Config.dbName + "] " +
+                                      @"DELETE FROM [dbo].[appointments]" +
+                                      @"WHERE [id] = @AppointmentId;";
+
+                    cmd.Parameters.AddWithValue("@AppointmentId", id);
+
+                    cmd.ExecuteNonQuery();
+                }
+
+            }
+            catch (Exception ex)
+            {
+                Log.Add(LogType.error, "[DbAppointment.RegisterAppointment]: " + ex.Message);
+            }
+        }
 	}
 }

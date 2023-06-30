@@ -13,6 +13,7 @@
                 appointment.start = data[i].date.substring(0, 10) + 'T' + data[i].time;
                 appointment.description = data[i].description;
                 appointment.className = "fc-event-success";
+                appointment.url = `/Appointment/Edit/${data[i].id}`;
                 appointmentsList.push(appointment);
             }
 
